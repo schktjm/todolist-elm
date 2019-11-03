@@ -33,7 +33,7 @@ update msg model =
         Change val ->
             { model | text = val }
         Add  ->
-            { model | todos = (Todo model.text)::model.todos }
+            { model | todos = (Todo model.text)::model.todos, text = "" }
         
 
 -- VIEW
@@ -43,8 +43,7 @@ view model =
     div[]
     [ div[]
         [ input [ placeholder "input text", value model.text, onInput Change ][]
-        , div [][ text model.text ]
-        , button [ onClick Add ][]
+        , button [ onClick Add ][text "add"]
         ]
     , div[]
         [
