@@ -15,22 +15,24 @@ type alias Todo =
     {text: String}
 
 type alias Model = 
-    { todos: List Todo, text: String }
+    { todos: List Todo, text: String, updateText: String, isFixing: Bool }
 
 init : Model
 init = Model  
-    [] "" 
+    [] "" "" False
 
 
 -- UPDATE
 
-type Msg = Change String | Add | Delete Int | Print String
+type Msg = ChangeText String | ChangeUpdateText String| Add | Delete Int | Update | Print String
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        Change val ->
+        ChangeText val ->
             { model | text = val }
+        ChangeUpdateText str ->
+            { model | updateText = str}
         Add  ->
             { model | todos = (Todo model.text)::model.todos, text = "" }
         Delete idx ->
@@ -40,6 +42,8 @@ update msg model =
                     |> List.filter (\(i, _) -> i /= idx)
                     |> List.map Tuple.second
             }
+        Update -> 
+            {model | isFixing = True}
         Print str ->
             let
                 _ = Debug.log "print" str
@@ -53,13 +57,14 @@ view : Model -> Html Msg
 view model =
     div[]
     [ div[]
-        [ input [ placeholder "input text", value model.text, onInput Change ][]
+        [ input [ placeholder "input text", value model.text, onInput ChangeText ][]
         , button [ onClick Add ][text "add"]
         ]
     , div[]
         [
             ul[](List.indexedMap viewTodo  model.todos )
         ]
+    , viewUpdateArea model
     ]
 
 
@@ -67,5 +72,16 @@ viewTodo : Int -> Todo -> Html Msg
 viewTodo num todo =
     li[]
     [ text todo.text
+    , button [ onClick Update ][text "fix"]
     , button [ onClick (Delete num) ][text "delete"] ]
     
+viewUpdateArea : Model -> Html Msg
+viewUpdateArea model =
+    if model.isFixing then
+        div[]
+        [ input [ placeholder "update text", value model.updateText, onInput ChangeUpdateText][]
+        , button [][text "update"]
+        ]
+    else
+        div[][ text "not fixing"]
+
